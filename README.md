@@ -1,2 +1,1 @@
-# spring-webflux-chat
-spring-webflux-chat
+docker run -d -p 6379:6379 -e REDIS_PASSWORD=password bitnami/redis:4.0.11-r6
