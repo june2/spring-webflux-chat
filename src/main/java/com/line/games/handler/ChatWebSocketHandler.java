@@ -44,18 +44,18 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                     log.info("webSocketMessage: {}", webSocketMessage.getPayloadAsText());
                     ReciveMessage msg = ObjectStringConverter.stringToObject(webSocketMessage.getPayloadAsText());
                     log.info("ReciveMessage: {}", msg);
-                    return redisChatMessagePublisher.publishChatMessage(webSocketMessage.getPayloadAsText());
+                    return redisChatMessagePublisher.publishChatMessage(webSocketSession.getId(), webSocketMessage.getPayloadAsText());
                 })
                 .doOnSubscribe(subscription -> {
                     long activeUserCount = activeUserCounter.incrementAndGet();
                     log.info("User '{}' Connected. Total Active Users: {}", webSocketSession, activeUserCount);
-                    chatMessageFluxSink.next(new ChatMessage(0, "CONNECTED", activeUserCount));
+                    chatMessageFluxSink.next(new ChatMessage(0, "CONNECTED", null));
                 })
                 .doOnError(throwable -> log.info("Error Occurred while sending message to Redis.", throwable))
                 .doFinally(signalType -> {
                     long activeUserCount = activeUserCounter.decrementAndGet();
                     log.info("User '{}' Disconnected. Total Active Users: {}", webSocketSession.getId(), activeUserCount);
-                    chatMessageFluxSink.next(new ChatMessage(0, "DISCONNECTED", activeUserCount));
+                    chatMessageFluxSink.next(new ChatMessage(0, "DISCONNECTED", null));
                 })
                 .then();
 

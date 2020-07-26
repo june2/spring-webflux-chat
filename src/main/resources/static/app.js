@@ -56,24 +56,19 @@ $(document).ready(function () {
 
 		websocket.onmessage = messageEvent => {
 			let chatMessage = JSON.parse(messageEvent.data);
-			console.log(chatMessage);
-			let type = chatMessage.type;
-			switch (type) {
-			    case 'GET_ID' :
-			        userId = chatMessage.userId;
-			        break;
-			    case 'MESSAGE' :
-                    setMessageCount(chatMessage.id);
-                    setUsersOnlineCount(chatMessage.usersOnline);
-                    showChatMessage(chatMessage);
-                    break;
-                case 'CONNECTED' :
-                    setUsersOnlineCount(chatMessage.usersOnline);
+			console.log("Message: ", chatMessage);
+            if (chatMessage.id !== 0) {
+                setMessageCount(chatMessage.id);
+                setUsersOnlineCount(chatMessage.usersOnline);
+                showChatMessage(chatMessage);
+            } else {
+                setUsersOnlineCount(chatMessage.usersOnline);
+                if (chatMessage.message === "CONNECTED") {
                     showUserConnectedAlert();
-                case 'DISCONNECTED' :
-                    setUsersOnlineCount(chatMessage.usersOnline);
+                } else {
                     showUserDisconnectedAlert();
-			}
+                }
+            }
 		};
 
 		websocket.onerror = errorEvent => {
@@ -115,13 +110,13 @@ $(document).ready(function () {
 	    console.log(userId, chatMessage.userId)
 		rowCount++;
 		if(userId === chatMessage.userId) {
-		    $("#messages").prepend(`<div class="outgoing_msg">
+		    $("#messages").append(`<div class="outgoing_msg">
 		                                <div class="sent_msg">
 		                                    <p>${chatMessage.message}</p><span class="time_date">${'User ID : '+chatMessage.userId}</span>
                                         </div>
                                     </div>`);
 		} else {
-            $("#messages").prepend(`<div class="incoming_msg">
+            $("#messages").append(`<div class="incoming_msg">
                                         <div class="incoming_msg_img">
                                             <img src="https://ptetutorials.com/images/user-profile.png"alt="sunil">
                                         </div>
@@ -129,8 +124,10 @@ $(document).ready(function () {
                                             <div class="received_withd_msg">
                                                 <p>${chatMessage.message}</p><span class="time_date">${'User ID : '+chatMessage.userId}</span>
                                             </div>
-                                        </div>`);
+                                        </div>
+                                    </div><br/>`);
 		}
+		$("#messages").animate({ scrollTop: $(document).height() }, 1000);
 	}
 
 	$disconnect.click(function () {

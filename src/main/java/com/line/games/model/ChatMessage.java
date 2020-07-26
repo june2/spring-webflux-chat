@@ -11,5 +11,5 @@ public class ChatMessage {
 
 	private Integer id;
 	private String message;
-	private Long userId;
+	private String userId;
 }

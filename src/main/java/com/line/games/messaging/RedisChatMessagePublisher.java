@@ -29,10 +29,10 @@ public class RedisChatMessagePublisher {
         this.objectMapper = objectMapper;
     }
 
-    public Mono<Long> publishChatMessage(String message) {
+    public Mono<Long> publishChatMessage(String id, String message) {
         Integer totalChatMessage = chatMessageCounter.incrementAndGet();
         return Mono.fromCallable(() -> {
-            ChatMessage chatMessage = new ChatMessage(totalChatMessage, message, activeUserCounter.get());
+            ChatMessage chatMessage = new ChatMessage(totalChatMessage, message, id);
             String chatString = "EMPTY_MESSAGE";
             try {
                 chatString = objectMapper.writeValueAsString(chatMessage);
