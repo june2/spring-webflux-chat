@@ -25,9 +25,9 @@ import static com.line.games.config.ChatConstants.WEBSOCKET_MESSAGE_MAPPING;
 public class ReactiveWebSocketConfig {
 
 	@Bean
-	public ChatWebSocketHandler webSocketHandler(RedisChatMessagePublisher redisChatMessagePublisher, RedisAtomicLong activeUserCounter) {
+	public ChatWebSocketHandler webSocketHandler(RedisChatMessagePublisher redisChatMessagePublisher) {
 		DirectProcessor<ChatMessage> messageDirectProcessor = DirectProcessor.create();
-		return new ChatWebSocketHandler(messageDirectProcessor, redisChatMessagePublisher, activeUserCounter);
+		return new ChatWebSocketHandler(messageDirectProcessor, redisChatMessagePublisher);
 	}
 
 	@Bean

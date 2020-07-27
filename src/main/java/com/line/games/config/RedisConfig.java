@@ -39,12 +39,6 @@ public class RedisConfig {
 		return new RedisAtomicInteger(MESSAGE_COUNTER_KEY, redisConnectionFactory);
 	}
 
-	// Redis Atomic Counter to store no. of Active Users.
-	@Bean
-    RedisAtomicLong activeUserCounter(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisAtomicLong(ACTIVE_USER_KEY, redisConnectionFactory);
-	}
-
 	@Bean
     ApplicationRunner applicationRunner(RedisChatMessageListener redisChatMessageListener) {
 		return args -> {
