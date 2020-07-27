@@ -1,7 +1,11 @@
 package com.line.games.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.line.games.messaging.RedisChatMessagePublisher;
 import com.line.games.model.ChatMessage;
+import com.line.games.model.Type;
+import com.line.games.model.User;
+import com.line.games.service.JwtService;
 import com.line.games.util.ObjectStringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -12,27 +16,34 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.util.Optional;
+
 @Slf4j
 public class ChatWebSocketHandler implements WebSocketHandler {
 
     private final DirectProcessor<ChatMessage> messageDirectProcessor;
     private final FluxSink<ChatMessage> chatMessageFluxSink;
     private final RedisChatMessagePublisher redisChatMessagePublisher;
+    private final JwtService jwtService;
+    private ObjectMapper mapper;
 
     public ChatWebSocketHandler(DirectProcessor<ChatMessage> messageDirectProcessor,
-                                RedisChatMessagePublisher redisChatMessagePublisher) {
+                                RedisChatMessagePublisher redisChatMessagePublisher, JwtService jwtService) {
         this.messageDirectProcessor = messageDirectProcessor;
         this.chatMessageFluxSink = messageDirectProcessor.sink();
         this.redisChatMessagePublisher = redisChatMessagePublisher;
+        this.jwtService = jwtService;
+        this.mapper = new ObjectMapper();
     }
 
     @Override
-        public Mono<Void> handle(WebSocketSession webSocketSession) {
-        log.info("WebSocketSession :: [{}]", webSocketSession);
+    public Mono<Void> handle(WebSocketSession webSocketSession) {
+        // Auth
         String token = ObjectStringConverter.getToken(webSocketSession.getHandshakeInfo().getUri().toString());
         log.info("token :: [{}]", token);
-        // Auth
-        if(!token.equals("test")) {
+        User user = jwtService.verify(token);
+        if (!Optional.ofNullable(user).isPresent()) {
             return webSocketSession.close();
         }
         Flux<WebSocketMessage> sendMessageFlux = messageDirectProcessor.flatMap(ObjectStringConverter::objectToString)
@@ -41,18 +52,21 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         Mono<Void> outputMessage = webSocketSession.send(sendMessageFlux);
 
         Mono<Void> inputMessage = webSocketSession.receive()
-                .flatMap(webSocketMessage -> {
-                    log.info("webSocketMessage: {}", webSocketMessage.getPayloadAsText());
-                    return redisChatMessagePublisher.publishChatMessage(webSocketSession.getId(), webSocketMessage.getPayloadAsText());
+                .map(WebSocketMessage::getPayloadAsText)
+                .map(this::toChatMessage)
+                .doOnNext(chatMessage -> {
+                    chatMessage.setUserId(user.getId());
+                    log.info("chatMessage : {}", chatMessage.toString());
+                    chatMessageFluxSink.next(chatMessage);
                 })
                 .doOnSubscribe(subscription -> {
-                    log.info("User '{}' Connected. Total Active Users: {}", webSocketSession, webSocketSession.getId());
-                    chatMessageFluxSink.next(new ChatMessage(0, "CONNECTED", null));
+                    log.info("User '{}' Connected.", user.toString(), webSocketSession);
+                    chatMessageFluxSink.next(new ChatMessage(Type.USER_JOINED, user.getEmail(), user.getId()));
                 })
                 .doOnError(throwable -> log.info("Error Occurred while sending message to Redis.", throwable))
                 .doFinally(signalType -> {
-                    log.info("User '{}' Disconnected. Total Active Users: {}", webSocketSession, webSocketSession.getId());
-                    chatMessageFluxSink.next(new ChatMessage(0, "DISCONNECTED", null));
+                    log.info("User '{}' Disconnected.", webSocketSession);
+                    chatMessageFluxSink.next(new ChatMessage(Type.USER_LEFT, user.getEmail(), user.getId()));
                 })
                 .then();
 
@@ -63,4 +77,11 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         return Mono.fromSupplier(() -> chatMessageFluxSink.next(chatMessage)).then();
     }
 
+    private ChatMessage toChatMessage(String json) {
+        try {
+            return mapper.readValue(json, ChatMessage.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Invalid JSON:" + json, e);
+        }
+    }
 }

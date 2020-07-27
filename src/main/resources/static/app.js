@@ -7,7 +7,8 @@ $(document).ready(function () {
 	let $connect = $("#connect");
 	let $disconnect = $("#disconnect");
 	let $chatMessage = $("#chat-message");
-	let userId = '';
+	let user = localStorage.getItem('user');;
+	let token = localStorage.getItem('token');;
 
 	$alert.hide();
 	$userConnected.hide();
@@ -46,7 +47,7 @@ $(document).ready(function () {
 		let host = location.hostname + (location.port ? ':' + location.port : '');
 		let wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
 
-		websocket = new WebSocket(wsProtocol + host + "/redis-chat");
+		websocket = new WebSocket(wsProtocol + host + "/redis-chat?token=" + token);
 
 		websocket.onopen = openEvent => {
 		    console.log('openEvent : ', openEvent);
@@ -107,9 +108,9 @@ $(document).ready(function () {
 	}
 
 	function showChatMessage(chatMessage) {
-	    console.log(userId, chatMessage.userId)
+	    console.log(user.email, chatMessage.userId)
 		rowCount++;
-		if(userId === chatMessage.userId) {
+		if(user.email === chatMessage.userId) {
 		    $("#messages").append(`<div class="outgoing_msg">
 		                                <div class="sent_msg">
 		                                    <p>${chatMessage.message}</p><span class="time_date">${'User ID : '+chatMessage.userId}</span>
@@ -157,12 +158,18 @@ $(document).ready(function () {
 
 		if (websocket != null && websocket.readyState === websocket.OPEN) {
 			let chatMessage = $chatMessage.val();
-			websocket.send(chatMessage);
+			websocket.send({
+			    message : chatMessage,
+			    userId : user.id
+			});
 			$chatMessage.val("");
 		} else {
 			connect(function () {
 				let chatMessage = $chatMessage.val();
-				websocket.send(chatMessage);
+				websocket.send({
+                    message : chatMessage,
+                    userId : user.id
+                });
 				$chatMessage.val("");
 			})
 		}
@@ -171,7 +178,6 @@ $(document).ready(function () {
     if (websocket == null) {
         connect(function () {
             console.log("Connected");
-//            websocket.send('GET_ID');
         });
     }
 });

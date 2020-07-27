@@ -49,7 +49,10 @@ public class JwtService {
                     .setSigningKey(encodedSecret)
                     .parseClaimsJws(token)
                     .getBody();
-            return User.builder().email(claims.getSubject()).build();
+            return User.builder()
+                    .id(Long.parseLong(claims.getId()))
+                    .email(claims.getSubject())
+                    .build();
         } catch (Exception e) {
             return null;
         }
@@ -58,7 +61,7 @@ public class JwtService {
 
     protected String getToken(String encodedSecret, User user) {
         return Jwts.builder()
-                .setId(UUID.randomUUID().toString())
+                .setId(user.getId().toString())
                 .setSubject(user.getEmail())
                 .claim("name", user.getName())
                 .setIssuedAt(new Date())

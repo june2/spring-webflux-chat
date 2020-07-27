@@ -17,9 +17,11 @@ public class UserService {
     public void init() {
         data = new HashMap<>();
         // test1@test.com:123456
-        data.put("test1@test.com", new User("test1@test.com", "user1", "$2a$10$ton5ZTBcW5cGac1vsx4Gl.omOsZWoDpr2u52J7L0r70s9VY.mGK2W"));
+        data.put("test1@test.com", new User(1L, "test1@test.com", "user1", "$2a$10$ton5ZTBcW5cGac1vsx4Gl.omOsZWoDpr2u52J7L0r70s9VY.mGK2W"));
         // test2@test.com:123456
-        data.put("test2@test.com", new User("test2@test.com", "user2", "$2a$10$ton5ZTBcW5cGac1vsx4Gl.omOsZWoDpr2u52J7L0r70s9VY.mGK2W"));
+        data.put("test2@test.com", new User(2L, "test2@test.com", "user2", "$2a$10$ton5ZTBcW5cGac1vsx4Gl.omOsZWoDpr2u52J7L0r70s9VY.mGK2W"));
+        // test3@test.com:123456
+        data.put("test3@test.com", new User(3L, "test3@test.com", "user3", "$2a$10$ton5ZTBcW5cGac1vsx4Gl.omOsZWoDpr2u52J7L0r70s9VY.mGK2W"));
     }
 
     public Mono<User> findByEmail(String email) {

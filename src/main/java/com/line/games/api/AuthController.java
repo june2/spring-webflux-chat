@@ -33,7 +33,7 @@ public class AuthController {
             if (!authService.authenticate(req.getPassword(), user.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-            return ResponseEntity.ok(new AuthResponse(jwtService.getToken(user)));
+            return ResponseEntity.ok(new AuthResponse(jwtService.getToken(user), user));
         }).defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 

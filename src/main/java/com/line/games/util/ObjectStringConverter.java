@@ -1,8 +1,6 @@
 package com.line.games.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.line.games.model.ReciveMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -14,14 +12,6 @@ import java.util.List;
 public class ObjectStringConverter {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    public static ReciveMessage stringToObject(String data) {
-        try {
-            return objectMapper.readValue(data, ReciveMessage.class);
-        } catch (Error | JsonProcessingException e) {
-            return null;
-        }
-    }
 
     public static String getToken(String data) {
         try {

@@ -26,16 +26,16 @@ public class RedisChatMessagePublisher {
         this.objectMapper = objectMapper;
     }
 
-    public Mono<Long> publishChatMessage(String id, String message) {
+    public Mono<Long> publishChatMessage(Long userId, String message) {
         Integer totalChatMessage = chatMessageCounter.incrementAndGet();
         return Mono.fromCallable(() -> {
-            ChatMessage chatMessage = new ChatMessage(totalChatMessage, message, id);
+//            ChatMessage chatMessage = new ChatMessage(totalChatMessage, message, userId);
             String chatString = "EMPTY_MESSAGE";
-            try {
-                chatString = objectMapper.writeValueAsString(chatMessage);
-            } catch (JsonProcessingException e) {
-                log.error("Error converting ChatMessage {} into string", chatMessage, e);
-            }
+//            try {
+//                chatString = objectMapper.writeValueAsString(chatMessage);
+//            } catch (JsonProcessingException e) {
+//                log.error("Error converting ChatMessage {} into string", chatMessage, e);
+//            }
             return chatString;
         }).flatMap(chatString -> {
             log.info("chatString : {}", chatString);
