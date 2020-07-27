@@ -6,6 +6,9 @@
 	<link href="/login.css" rel="stylesheet">
     <script>
         $(document).ready(function () {
+            if(localStorage.getItem("token")){
+                window.location.href = "/";
+            }
             $("#login").click(function(){
               $.ajax({
                   url: "http://localhost:8080/api/login",
@@ -16,7 +19,8 @@
                   dataType: "json",
                   success: function(result){
                       localStorage.setItem("token", result.token);
-                      localStorage.setItem("user", result.user);
+                      localStorage.setItem("userId", result.user.id);
+                      localStorage.setItem("email", result.user.email);
                       window.location.href = "/";
                   }});
             });

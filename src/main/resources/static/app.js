@@ -1,14 +1,19 @@
 $(document).ready(function () {
 
-	// define selectors to avoid duplication
 	let $alert = $('#websocket-disconnected');
 	let $userConnected = $("#connect-alert");
 	let $userDisconnect = $("#disconnect-alert");
 	let $connect = $("#connect");
 	let $disconnect = $("#disconnect");
 	let $chatMessage = $("#chat-message");
-	let user = localStorage.getItem('user');;
-	let token = localStorage.getItem('token');;
+	let userId = localStorage.getItem('userId');
+	let email = localStorage.getItem('email');
+	let token = localStorage.getItem('token');
+
+    if(null === token) {
+        window.localStorage.clear();
+        window.location.href = "/login";
+    }
 
 	$alert.hide();
 	$userConnected.hide();
@@ -56,19 +61,21 @@ $(document).ready(function () {
 		};
 
 		websocket.onmessage = messageEvent => {
-			let chatMessage = JSON.parse(messageEvent.data);
-			console.log("Message: ", chatMessage);
-            if (chatMessage.id !== 0) {
-                setMessageCount(chatMessage.id);
-                setUsersOnlineCount(chatMessage.usersOnline);
-                showChatMessage(chatMessage);
-            } else {
-                setUsersOnlineCount(chatMessage.usersOnline);
-                if (chatMessage.message === "CONNECTED") {
+            let chatMessage = JSON.parse(messageEvent.data);
+            console.log(chatMessage);
+            let type = chatMessage.type;
+            switch (type) {
+                case 'CHAT_MESSAGE' :
+                    setMessageCount(chatMessage.id);
+                    setUsersOnlineCount(chatMessage.usersOnline);
+                    showChatMessage(chatMessage);
+                    break;
+                case 'USER_JOINED' :
+                    setUsersOnlineCount(chatMessage.usersOnline);
                     showUserConnectedAlert();
-                } else {
+                case 'USER_LEFT' :
+                    setUsersOnlineCount(chatMessage.usersOnline);
                     showUserDisconnectedAlert();
-                }
             }
 		};
 
@@ -108,12 +115,13 @@ $(document).ready(function () {
 	}
 
 	function showChatMessage(chatMessage) {
-	    console.log(user.email, chatMessage.userId)
 		rowCount++;
-		if(user.email === chatMessage.userId) {
+		if(Number(userId) === chatMessage.userId) {
 		    $("#messages").append(`<div class="outgoing_msg">
 		                                <div class="sent_msg">
-		                                    <p>${chatMessage.message}</p><span class="time_date">${'User ID : '+chatMessage.userId}</span>
+		                                    <span class="time_date">${'User ID : '+chatMessage.userId}</span>
+		                                    <p>${chatMessage.message}</p>
+		                                    <span class="time_date">${new Date(chatMessage.timestamp)}</span>
                                         </div>
                                     </div>`);
 		} else {
@@ -123,7 +131,9 @@ $(document).ready(function () {
                                         </div>
                                         <div class="received_msg">
                                             <div class="received_withd_msg">
-                                                <p>${chatMessage.message}</p><span class="time_date">${'User ID : '+chatMessage.userId}</span>
+                                                <span class="time_date">${'User ID : '+chatMessage.userId}</span>
+                                                <p>${chatMessage.message}</p>
+                                                <span class="time_date">${new Date(chatMessage.timestamp)}</span>
                                             </div>
                                         </div>
                                     </div><br/>`);
@@ -153,23 +163,20 @@ $(document).ready(function () {
 	});
 
 	function sendMessage() {
-
-		console.log('websocket', websocket);
-
 		if (websocket != null && websocket.readyState === websocket.OPEN) {
 			let chatMessage = $chatMessage.val();
-			websocket.send({
-			    message : chatMessage,
-			    userId : user.id
-			});
+			websocket.send(JSON.stringify({
+			    type: "CHAT_MESSAGE",
+			    message : chatMessage
+			}));
 			$chatMessage.val("");
 		} else {
 			connect(function () {
 				let chatMessage = $chatMessage.val();
-				websocket.send({
-                    message : chatMessage,
-                    userId : user.id
-                });
+				websocket.send(JSON.stringify({
+                    type: "CHAT_MESSAGE",
+                    message : chatMessage
+                }));
 				$chatMessage.val("");
 			})
 		}
