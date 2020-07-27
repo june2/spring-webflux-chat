@@ -24,11 +24,15 @@ public class ObjectStringConverter {
     }
 
     public static String getToken(String data) {
-        log.info(data);
-        MultiValueMap<String, String> parameters =
-                UriComponentsBuilder.fromUriString(data).build().getQueryParams();
-        List<String> param = parameters.get("token");
-        return param.get(0);
+        try {
+            log.info(data);
+            MultiValueMap<String, String> parameters =
+                    UriComponentsBuilder.fromUriString(data).build().getQueryParams();
+            List<String> param = parameters.get("token");
+            return param.get(0);
+        } catch (Error e) {
+            return "";
+        }
     }
 
     public static <T> Mono<T> stringToObject(String data, Class<T> clazz) {
