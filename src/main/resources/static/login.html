@@ -1,0 +1,49 @@
+<html>
+<head>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<link href="/login.css" rel="stylesheet">
+    <script>
+        $(document).ready(function () {
+            if(localStorage.getItem("token")){
+                window.location.href = "/";
+            }
+            $("#login").click(function(){
+              $.ajax({
+                  url: "http://localhost:8080/api/login",
+                  type: "POST",
+                  cache:false,
+                  contentType: "application/json",
+                  data: JSON.stringify({"email": $("#email").val(), "password": $("#password").val()}),
+                  dataType: "json",
+                  success: function(result){
+                      localStorage.setItem("token", result.token);
+                      localStorage.setItem("userId", result.user.id);
+                      localStorage.setItem("email", result.user.email);
+                      window.location.href = "/";
+                  }});
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <!-- Tabs Titles -->
+
+        <!-- Login Form -->
+        <form>
+            <input type="text" id="email" class="fadeIn second" name="email" placeholder="email" value="test1@test.com">
+            <input type="password" id="password" class="fadeIn third" name="login" placeholder="password" value="123456">
+            <input id="login" type="button" class="fadeIn fourth" value="Log In">
+        </form>
+
+        <!-- Remind Passowrd -->
+        <div id="formFooter">
+            <a class="underlineHover" href="#">Forgot Password?</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
