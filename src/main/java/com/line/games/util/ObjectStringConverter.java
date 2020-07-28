@@ -15,7 +15,6 @@ public class ObjectStringConverter {
 
     public static String getToken(String data) {
         try {
-            log.info(data);
             MultiValueMap<String, String> parameters =
                     UriComponentsBuilder.fromUriString(data).build().getQueryParams();
             List<String> param = parameters.get("token");

@@ -1,10 +1,6 @@
 $(document).ready(function () {
 
 	let $alert = $('#websocket-disconnected');
-	let $userConnected = $("#connect-alert");
-	let $userDisconnect = $("#disconnect-alert");
-	let $connect = $("#connect");
-	let $disconnect = $("#disconnect");
 	let $chatMessage = $("#chat-message");
 	let userId = localStorage.getItem('userId');
 	let email = localStorage.getItem('email');
@@ -15,39 +11,15 @@ $(document).ready(function () {
         window.location.href = "/login";
     }
 
-	$alert.hide();
-	$userConnected.hide();
-	$userDisconnect.hide();
-
-	function showUserConnectedAlert() {
-		$userConnected.fadeTo(2000, 500).slideUp(500, function() {
-			$userConnected.slideUp(500);
-		});
-	}
-
-	function showUserDisconnectedAlert() {
-		$userDisconnect.fadeTo(2000, 500).slideUp(500, function() {
-			$userDisconnect.slideUp(500);
-		});
-	}
-
 	let messageCount = 0;
 	let rowCount = 0;
 	let websocket = null;
 
 	function setConnected(connected) {
-		$connect.prop("disabled", connected);
-		$disconnect.prop("disabled", !connected);
-		if (connected) {
-			$("#chatMessage").show();
-		} else {
-			$("#chatMessage").hide();
-		}
-		$("#messages").html("");
+//		$("#messages").html("");
 	}
 
 	function connect(callback) {
-		$alert.hide();
 
 		let host = location.hostname + (location.port ? ':' + location.port : '');
 		let wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
@@ -66,16 +38,12 @@ $(document).ready(function () {
             let type = chatMessage.type;
             switch (type) {
                 case 'CHAT_MESSAGE' :
-                    setMessageCount(chatMessage.id);
-                    setUsersOnlineCount(chatMessage.usersOnline);
                     showChatMessage(chatMessage);
                     break;
                 case 'USER_JOINED' :
-                    setUsersOnlineCount(chatMessage.usersOnline);
-                    showUserConnectedAlert();
+                    showAlertJoin(chatMessage);
                 case 'USER_LEFT' :
-                    setUsersOnlineCount(chatMessage.usersOnline);
-                    showUserDisconnectedAlert();
+                    showAlertLeft(chatMessage);
             }
 		};
 
@@ -88,8 +56,6 @@ $(document).ready(function () {
 			console.log("WebSocket Session Closed.", closeEvent);
 			disconnect();
 		};
-
-		$("#messageCount").text(messageCount);
 	}
 
 	function disconnect() {
@@ -98,21 +64,19 @@ $(document).ready(function () {
 		}
 		setConnected(false);
 		console.log("Session Closed. WebSocket Disconnected.");
-		messageCount = 0;
-		rowCount = 0;
-
-		$alert.fadeTo(5000, 500).slideUp(500, function() {
-			$alert.slideUp(500);
-		});
 	}
 
-	function setMessageCount(totalCount) {
-		$("#message-count").text(totalCount);
-	}
+    function showAlertJoin(chatMessage) {
+        $("#messages").append(`<div class="alert_msg">
+                                   <p>${'User '+chatMessage.userId+ ' joined'}</p>
+                               </div>`);
+    }
 
-	function setUsersOnlineCount(userOnline) {
-		$("#users-online").text(userOnline);
-	}
+    function showAlertLeft(chatMessage) {
+        $("#messages").append(`<div class="alert_msg">
+                                   <p>${'User '+chatMessage.userId+ ' left'}</p>
+                               </div>`);
+    }
 
 	function showChatMessage(chatMessage) {
 		rowCount++;
@@ -140,16 +104,6 @@ $(document).ready(function () {
 		}
 		$("#messages").animate({ scrollTop: $(document).height() }, 1000);
 	}
-
-	$disconnect.click(function () {
-		console.log("Disconnect");
-		disconnect();
-	});
-
-	$("#close-alert").click(function () {
-		$alert.hide();
-	});
-
 
 	$("#send-ws-message").click(function () {
 		sendMessage();

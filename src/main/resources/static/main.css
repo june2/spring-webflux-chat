@@ -101,6 +101,7 @@ img{ max-width:100%;}
   width:100%;
 }
 .outgoing_msg{ overflow:hidden; margin:26px 0 26px;}
+.alert_msg{ overflow:hidden; margin:26px 0 26px;text-align: center;}
 .sent_msg {
   float: right;
   width: 46%;
