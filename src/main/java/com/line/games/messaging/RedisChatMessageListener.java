@@ -26,8 +26,8 @@ public class RedisChatMessageListener {
      * redis listener 생성
      * TODO: 멀티채널 변경필요!
      */
-    public Mono<Void> subscribeMessageChannelAndPublishOnWebSocket() {
-        return reactiveStringRedisTemplate.listenTo(new PatternTopic(MESSAGE_TOPIC))
+    public Mono<Void> subscribeMessageChannelAndPublishOnWebSocket(String name) {
+        return reactiveStringRedisTemplate.listenTo(new PatternTopic(MESSAGE_TOPIC + name))
                 .map(ReactiveSubscription.Message::getMessage)
                 .flatMap(message -> ObjectStringConverter.stringToObject(message, ChatMessage.class))
                 .filter(chatMessage -> !chatMessage.getMessage().isEmpty())

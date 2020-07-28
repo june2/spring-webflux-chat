@@ -24,19 +24,20 @@ public class RedisConfig {
 		return new LettuceConnectionFactory(redisStandaloneConfiguration);
 	}
 
-	/**
-	 * redis listener 생성
-	 * TODO: 멀티채널 변경필요!
-	 */
-	@Bean
-    ApplicationRunner applicationRunner(RedisChatMessageListener redisChatMessageListener) {
-		return args -> {
-			redisChatMessageListener.subscribeMessageChannelAndPublishOnWebSocket()
-				.doOnSubscribe(subscription -> log.info("Redis Listener Started"))
-				.doOnError(throwable -> log.error("Error listening to Redis topic.", throwable))
-				.doFinally(signalType -> log.info("Stopped Listener. Signal Type: {}", signalType))
-				.subscribe();
-		};
-	}
+//	/**
+//	 * redis listener 생성
+//	 * TODO: 멀티채널 변경필요!
+//	 */
+//	@Bean
+//    ApplicationRunner applicationRunner(RedisChatMessageListener redisChatMessageListener) {
+//
+//		return args -> {
+//			redisChatMessageListener.subscribeMessageChannelAndPublishOnWebSocket("")
+//				.doOnSubscribe(subscription -> log.info("Redis Listener Started"))
+//				.doOnError(throwable -> log.error("Error listening to Redis topic.", throwable))
+//				.doFinally(signalType -> log.info("Stopped Listener. Signal Type: {}", signalType))
+//				.subscribe();
+//		};
+//	}
 
 }
