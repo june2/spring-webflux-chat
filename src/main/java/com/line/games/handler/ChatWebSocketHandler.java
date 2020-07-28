@@ -1,7 +1,6 @@
 package com.line.games.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.line.games.messaging.RedisChatMessagePublisher;
 import com.line.games.model.ChatMessage;
 import com.line.games.model.Type;
 import com.line.games.model.User;
@@ -24,15 +23,13 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     private final DirectProcessor<ChatMessage> messageDirectProcessor;
     private final FluxSink<ChatMessage> chatMessageFluxSink;
-    private final RedisChatMessagePublisher redisChatMessagePublisher;
     private final JwtService jwtService;
     private ObjectMapper mapper;
 
     public ChatWebSocketHandler(DirectProcessor<ChatMessage> messageDirectProcessor,
-                                RedisChatMessagePublisher redisChatMessagePublisher, JwtService jwtService) {
+                                JwtService jwtService) {
         this.messageDirectProcessor = messageDirectProcessor;
         this.chatMessageFluxSink = messageDirectProcessor.sink();
-        this.redisChatMessagePublisher = redisChatMessagePublisher;
         this.jwtService = jwtService;
         this.mapper = new ObjectMapper();
     }

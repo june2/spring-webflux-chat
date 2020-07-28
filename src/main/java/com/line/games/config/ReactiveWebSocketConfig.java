@@ -1,7 +1,6 @@
 package com.line.games.config;
 
 import com.line.games.handler.ChatWebSocketHandler;
-import com.line.games.messaging.RedisChatMessagePublisher;
 import com.line.games.model.ChatMessage;
 import com.line.games.service.JwtService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +28,9 @@ public class ReactiveWebSocketConfig {
 	private JwtService jwtService;
 
 	@Bean
-	public ChatWebSocketHandler webSocketHandler(RedisChatMessagePublisher redisChatMessagePublisher) {
+	public ChatWebSocketHandler webSocketHandler() {
 		DirectProcessor<ChatMessage> messageDirectProcessor = DirectProcessor.create();
-		return new ChatWebSocketHandler(messageDirectProcessor, redisChatMessagePublisher, jwtService);
+		return new ChatWebSocketHandler(messageDirectProcessor, jwtService);
 	}
 
 	@Bean
