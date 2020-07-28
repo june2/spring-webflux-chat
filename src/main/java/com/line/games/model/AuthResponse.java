@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReciveMessage {
-	private String room;
-	private String message;
+public class AuthResponse {
+	private String token;
+	private User user;
 }
