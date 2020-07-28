@@ -22,8 +22,10 @@ public class WebHttpHandler {
      */
     @Bean
     public RouterFunction<ServerResponse> htmlRouter(@Value("classpath:/static/index.html") Resource html,
-                                                     @Value("classpath:/static/login.html") Resource login) {
+                                                     @Value("classpath:/static/login.html") Resource login,
+                                                     @Value("classpath:/static/room.html") Resource room) {
         return route(GET("/"), request -> ok().contentType(MediaType.TEXT_HTML).bodyValue(html))
-                .andRoute(GET("/login"), request -> ok().contentType(MediaType.TEXT_HTML).bodyValue(login));
+                .andRoute(GET("/login"), request -> ok().contentType(MediaType.TEXT_HTML).bodyValue(login))
+                .andRoute(GET("/room"), request -> ok().contentType(MediaType.TEXT_HTML).bodyValue(room));
     }
 }

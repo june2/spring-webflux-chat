@@ -1,0 +1,54 @@
+<html>
+<head>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            function getRooms() {
+              $.ajax({
+                  url: "http://localhost:8080/api/rooms",
+                  type: "GET",
+                  success: function(result){
+                        console.log(result);
+                        $("#list").html("");
+                        for (let room in result){
+                            $("#list").append(`<a href="#" class="list-group-item list-group-item-action">ID : ${result[room].id}, Name : ${result[room].name}</a>`);
+                        }
+              }});
+          }
+
+           $("#create").click(function(){
+              $.ajax({
+                  url: "http://localhost:8080/api/room",
+                  type: "POST",
+                  cache:false,
+                  contentType: "application/json",
+                  data: JSON.stringify({"name": $("#room").val()}),
+                  dataType: "json",
+                  success: function(result){
+                         getRooms();
+                  }});
+           });
+
+          getRooms();
+       });
+    </script>
+</head>
+<body>
+<div class="list-group">
+    <div>
+        <form>
+            <div class="form-group">
+                <label for="room">room name</label>
+                <input type="text" class="form-control" id="room" placeholder="Enter room name">
+            </div>
+            <button type="button" id="create" class="btn btn-primary">create</button>
+        </form>
+    </div>
+    <div id="list">
+    </div>
+</div>
+</body>
+</html>

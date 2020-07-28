@@ -2,6 +2,7 @@ package com.line.games.api;
 
 import com.line.games.messaging.RedisChatMessageListener;
 import com.line.games.model.RoomRequest;
+import com.line.games.service.RoomService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +18,23 @@ public class RoomController {
 
     @Autowired
     private RedisChatMessageListener redisChatMessageListener;
+    @Autowired
+    private RoomService roomService;
 
     @RequestMapping(value = "/api/room", method = RequestMethod.POST)
     public Mono<ResponseEntity<?>> create(@RequestBody RoomRequest req) {
-        redisChatMessageListener.subscribeMessageChannelAndPublishOnWebSocket(req.getName())
-                .doOnSubscribe(subscription -> log.info("Redis Listener Started"))
-                .doOnError(throwable -> log.error("Error listening to Redis topic.", throwable))
-                .doFinally(signalType -> log.info("Stopped Listener. Signal Type: {}", signalType))
-                .subscribe();
-        return Mono.just(ResponseEntity.ok(req.getName()));
+        return roomService.create(req.getName()).map(room -> {
+            redisChatMessageListener.subscribeMessageChannelAndPublishOnWebSocket(room.getName())
+                    .doOnSubscribe(subscription -> log.debug("{} room created", room.getName()))
+                    .doOnError(throwable -> log.error("Error listening to Redis topic.", throwable))
+                    .doFinally(signalType -> log.debug("Stopped Listener. Signal Type: {}", signalType))
+                    .subscribe();
+            return ResponseEntity.ok(room);
+        });
     }
 
+    @RequestMapping(value = "/api/rooms", method = RequestMethod.GET)
+    public Mono<ResponseEntity<?>> findAll() {
+        return Mono.just(ResponseEntity.ok(roomService.findAll()));
+    }
 }
