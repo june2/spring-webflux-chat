@@ -1,6 +1,7 @@
 package com.line.games.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.line.games.messaging.RedisChatMessagePublisher;
 import com.line.games.model.ChatMessage;
 import com.line.games.model.Type;
 import com.line.games.model.User;
@@ -24,15 +25,17 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     private final DirectProcessor<ChatMessage> messageDirectProcessor;
     private final FluxSink<ChatMessage> chatMessageFluxSink;
+    private final RedisChatMessagePublisher redisChatMessagePublisher;
     private final JwtService jwtService;
     private ObjectMapper mapper;
 
     public ChatWebSocketHandler(DirectProcessor<ChatMessage> messageDirectProcessor,
-                                JwtService jwtService) {
+                                RedisChatMessagePublisher redisChatMessagePublisher, JwtService jwtService) {
         this.messageDirectProcessor = messageDirectProcessor;
         this.chatMessageFluxSink = messageDirectProcessor.sink();
-        this.jwtService = jwtService;
+        this.redisChatMessagePublisher = redisChatMessagePublisher;
         this.mapper = new ObjectMapper();
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -56,7 +59,8 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                     chatMessage.setUserId(user.getId());
                     chatMessage.setType(Type.CHAT_MESSAGE);
                     log.info("chatMessage : {}", chatMessage.toString());
-                    sendMessage(chatMessage);
+//                    sendMessage(chatMessage);
+                    redisChatMessagePublisher.publishChatMessage("", chatMessage);
                 })
                 .doOnSubscribe(subscription -> {
                     log.info("User '{}' Connected.", user.toString(), webSocketSession);
