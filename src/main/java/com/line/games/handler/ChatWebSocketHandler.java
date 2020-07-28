@@ -55,25 +55,31 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         Mono<Void> inputMessage = webSocketSession.receive()
                 .map(WebSocketMessage::getPayloadAsText)
                 .map(this::toChatMessage)
-                .doOnNext(chatMessage -> {
+                .flatMap(chatMessage -> {
                     chatMessage.setUserId(user.getId());
                     chatMessage.setType(Type.CHAT_MESSAGE);
                     log.info("chatMessage : {}", chatMessage.toString());
-//                    sendMessage(chatMessage);
-                    redisChatMessagePublisher.publishChatMessage("", chatMessage);
+                    return redisChatMessagePublisher.publishChatMessage("", chatMessage);
                 })
                 .doOnSubscribe(subscription -> {
                     log.info("User '{}' Connected.", user.toString(), webSocketSession);
-                    chatMessageFluxSink.next(new ChatMessage(Type.USER_JOINED, user.getEmail(), user.getId()));
+                    redisChatMessagePublisher.publishChatMessage("", new ChatMessage(Type.USER_JOINED, user.getEmail(), user.getId()));
                 })
                 .doOnError(throwable -> log.info("Error Occurred while sending message to Redis.", throwable))
                 .doFinally(signalType -> {
                     log.info("User '{}' Disconnected.", webSocketSession);
-                    chatMessageFluxSink.next(new ChatMessage(Type.USER_LEFT, user.getEmail(), user.getId()));
+                    redisChatMessagePublisher.publishChatMessage("", new ChatMessage(Type.USER_LEFT, user.getEmail(), user.getId()));
                 })
                 .then();
 
         return Mono.zip(inputMessage, outputMessage).then();
+    }
+
+    /**
+     * send message
+     */
+    public Mono<Void> sendMessage(ChatMessage chatMessage) {
+        return Mono.fromSupplier(() -> chatMessageFluxSink.next(chatMessage)).then();
     }
 
     /**
@@ -85,12 +91,5 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         } catch (IOException e) {
             throw new RuntimeException("Invalid JSON:" + json, e);
         }
-    }
-
-    /**
-     * send message
-     */
-    private void sendMessage(ChatMessage chatMessage) {
-        chatMessageFluxSink.next(chatMessage);
     }
 }

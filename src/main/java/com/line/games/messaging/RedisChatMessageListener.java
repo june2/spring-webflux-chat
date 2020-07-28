@@ -6,7 +6,6 @@ import com.line.games.util.ObjectStringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.ReactiveSubscription;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -17,20 +16,22 @@ import static com.line.games.config.ChatConstants.MESSAGE_TOPIC;
 public class RedisChatMessageListener {
 
     private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
+    private final ChatWebSocketHandler chatWebSocketHandler;
 
-    public RedisChatMessageListener(ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+    public RedisChatMessageListener(ReactiveStringRedisTemplate reactiveStringRedisTemplate, ChatWebSocketHandler chatWebSocketHandler) {
         this.reactiveStringRedisTemplate = reactiveStringRedisTemplate;
+        this.chatWebSocketHandler = chatWebSocketHandler;
     }
 
     /**
      * redis listener 생성
-     * TODO: 멀티채널 변경필요!
      */
-    public Mono<Void> subscribeMessageChannelAndPublishOnWebSocket(String name) {
-        return reactiveStringRedisTemplate.listenTo(new PatternTopic(MESSAGE_TOPIC))
+    public Mono<Void> subscribeMessageChannelAndPublishOnWebSocket(String room) {
+        return reactiveStringRedisTemplate.listenToChannel(MESSAGE_TOPIC + room)
                 .map(ReactiveSubscription.Message::getMessage)
                 .flatMap(message -> ObjectStringConverter.stringToObject(message, ChatMessage.class))
                 .filter(chatMessage -> !chatMessage.getMessage().isEmpty())
+                .flatMap(chatWebSocketHandler::sendMessage)
                 .then();
     }
 

@@ -5,7 +5,6 @@ import com.line.games.messaging.RedisChatMessagePublisher;
 import com.line.games.model.ChatMessage;
 import com.line.games.service.JwtService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -25,13 +24,8 @@ import static com.line.games.config.ChatConstants.WEBSOCKET_MESSAGE_MAPPING;
 @Configuration(proxyBeanMethods=false)
 public class ReactiveWebSocketConfig {
 
-	@Autowired
-	private JwtService jwtService;
-	@Autowired
-	private RedisChatMessagePublisher redisChatMessagePublisher;
-
 	@Bean
-	public ChatWebSocketHandler webSocketHandler() {
+	public ChatWebSocketHandler webSocketHandler(RedisChatMessagePublisher redisChatMessagePublisher, JwtService jwtService) {
 		DirectProcessor<ChatMessage> messageDirectProcessor = DirectProcessor.create();
 		return new ChatWebSocketHandler(messageDirectProcessor, redisChatMessagePublisher, jwtService);
 	}

@@ -3,14 +3,9 @@ package com.line.games.messaging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.line.games.model.ChatMessage;
-import com.line.games.util.ObjectStringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.ReactiveSubscription;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.data.redis.listener.PatternTopic;
-import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
-import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -36,9 +31,8 @@ public class RedisChatMessagePublisher {
             return chatString;
         }).flatMap(chatString -> {
             log.info("chatString : {}", chatString);
-            // Publish Message to Redis Channels
-            return reactiveStringRedisTemplate.convertAndSend(MESSAGE_TOPIC, chatString)
-                    .doOnSuccess(aLong -> log.debug("Message published to Redis Topic."))
+            return reactiveStringRedisTemplate.convertAndSend(MESSAGE_TOPIC + room, chatString)
+                    .doOnSuccess(aLong -> log.debug("Message published to Redis room : {}", room))
                     .doOnError(throwable -> log.error("Error publishing message.", throwable));
         });
     }
