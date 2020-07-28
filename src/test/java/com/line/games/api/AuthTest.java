@@ -18,9 +18,9 @@ public class AuthTest extends ApplicationTest {
 
     @Test
     public void verify() {
-        String email = "test@test.com";
+        String email = "test1@test.com";
         String token = jwtService.getToken(
-                User.builder().email(email).password("123456").name("user1")
+                User.builder().id(1L).email(email).password("123456").name("user1")
                         .build());
         User user = jwtService.verify(token);
         Assert.assertTrue(user.getEmail().equals(email));
