@@ -24,13 +24,13 @@ $ ./gradlew bootRun
 ---
 
 ### 구현 리스트
-[x] Spring + webflux를 적용하여 기능 개발
-    - Spring + webflux 구현
-[x] 인증 기능 개발
-    - JWT 토큰 발행, 인증 구현
-[x] Redis 사용하여 부가 기능 개발
-    - redis pub/sub 구현, 현재 단일채널로 고정
-[ ] Reactive MongoDB를 적용하여 최근 채팅 메시지 가져오기
+ - [x] Spring + webflux를 적용하여 기능 개발
+     - Spring + webflux 구현
+ - [x] 인증 기능 개발
+     - JWT 토큰 발행, 인증 구현
+ - [x] Redis 사용하여 부가 기능 개발
+     - redis pub/sub 구현, 현재 단일채널로 고정
+ - [ ] Reactive MongoDB를 적용하여 최근 채팅 메시지 가져오기
 
 ---
 
