@@ -6,6 +6,7 @@ import com.line.games.model.Type;
 import com.line.games.model.User;
 import com.line.games.service.JwtService;
 import com.line.games.util.ObjectStringConverter;
+import com.line.games.util.Security;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -37,7 +38,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession webSocketSession) {
         // Auth
-        String token = ObjectStringConverter.getToken(webSocketSession.getHandshakeInfo().getUri().toString());
+        String token = Security.getToken(webSocketSession.getHandshakeInfo().getUri().toString());
         log.info("token :: [{}]", token);
         User user = jwtService.verify(token);
         if (!Optional.ofNullable(user).isPresent()) {
@@ -53,8 +54,9 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                 .map(this::toChatMessage)
                 .doOnNext(chatMessage -> {
                     chatMessage.setUserId(user.getId());
+                    chatMessage.setType(Type.CHAT_MESSAGE);
                     log.info("chatMessage : {}", chatMessage.toString());
-                    chatMessageFluxSink.next(chatMessage);
+                    sendMessage(chatMessage);
                 })
                 .doOnSubscribe(subscription -> {
                     log.info("User '{}' Connected.", user.toString(), webSocketSession);
@@ -70,15 +72,21 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         return Mono.zip(inputMessage, outputMessage).then();
     }
 
-    public Mono<Void> sendMessage(ChatMessage chatMessage) {
-        return Mono.fromSupplier(() -> chatMessageFluxSink.next(chatMessage)).then();
-    }
-
+    /**
+     * convert json to message
+     */
     private ChatMessage toChatMessage(String json) {
         try {
             return mapper.readValue(json, ChatMessage.class);
         } catch (IOException e) {
             throw new RuntimeException("Invalid JSON:" + json, e);
         }
+    }
+
+    /**
+     * send message
+     */
+    private void sendMessage(ChatMessage chatMessage) {
+        chatMessageFluxSink.next(chatMessage);
     }
 }

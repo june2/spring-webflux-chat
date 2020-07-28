@@ -17,19 +17,20 @@ import static com.line.games.config.ChatConstants.MESSAGE_TOPIC;
 public class RedisChatMessageListener {
 
     private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
-    private final ChatWebSocketHandler chatWebSocketHandler;
 
-    public RedisChatMessageListener(ReactiveStringRedisTemplate reactiveStringRedisTemplate, ChatWebSocketHandler chatWebSocketHandler) {
+    public RedisChatMessageListener(ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
         this.reactiveStringRedisTemplate = reactiveStringRedisTemplate;
-        this.chatWebSocketHandler = chatWebSocketHandler;
     }
 
+    /**
+     * redis listener 생성
+     * TODO: 멀티채널 변경필요!
+     */
     public Mono<Void> subscribeMessageChannelAndPublishOnWebSocket() {
         return reactiveStringRedisTemplate.listenTo(new PatternTopic(MESSAGE_TOPIC))
                 .map(ReactiveSubscription.Message::getMessage)
                 .flatMap(message -> ObjectStringConverter.stringToObject(message, ChatMessage.class))
                 .filter(chatMessage -> !chatMessage.getMessage().isEmpty())
-                .flatMap(chatWebSocketHandler::sendMessage)
                 .then();
     }
 

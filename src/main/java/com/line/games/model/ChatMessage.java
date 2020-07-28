@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ChatMessage {
     private static AtomicInteger ID_GENERATOR = new AtomicInteger(0);
 
-    private final int id;
-    private Type type;
-    private String message;
-    private Long userId;
-    private final long timestamp;
+    private final int id; // 메시지 ID
+    private Type type;  // 메시지 타입
+    private String message; // 메시지
+    private Long userId;  // 메시지 보낸사람
+    private final long timestamp; // 메시지 보낸시각
 
     @JsonCreator
     public ChatMessage(

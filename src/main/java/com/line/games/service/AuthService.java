@@ -17,10 +17,16 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    /**
+     *  패스워드 체크
+     */
     public boolean authenticate(String password, String encPassword) {
         return Security.match(password, encPassword);
     }
 
+    /**
+     * 인증 체크, 유저정보 가져오기
+     */
     public User authenticate(Authentication authentication) {
         User user = jwtService.verify((String) authentication.getCredentials());
         return Optional.ofNullable(user).map(res -> user)

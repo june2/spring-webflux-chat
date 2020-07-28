@@ -7,18 +7,16 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
-
-import static com.line.games.config.ChatConstants.MESSAGE_COUNTER_KEY;
 
 @Slf4j
 @Configuration(proxyBeanMethods=false)
 public class RedisConfig {
 
+	/**
+	 * redis connection
+	 */
 	@Bean
     ReactiveRedisConnectionFactory reactiveRedisConnectionFactory(RedisProperties redisProperties) {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort());
@@ -26,16 +24,10 @@ public class RedisConfig {
 		return new LettuceConnectionFactory(redisStandaloneConfiguration);
 	}
 
-	@Bean
-    ReactiveStringRedisTemplate template(ReactiveRedisConnectionFactory reactiveRedisConnectionFactory) {
-		return new ReactiveStringRedisTemplate(reactiveRedisConnectionFactory);
-	}
-
-	@Bean
-    RedisAtomicInteger chatMessageCounter(RedisConnectionFactory redisConnectionFactory) {
-		return new RedisAtomicInteger(MESSAGE_COUNTER_KEY, redisConnectionFactory);
-	}
-
+	/**
+	 * redis listener 생성
+	 * TODO: 멀티채널 변경필요!
+	 */
 	@Bean
     ApplicationRunner applicationRunner(RedisChatMessageListener redisChatMessageListener) {
 		return args -> {

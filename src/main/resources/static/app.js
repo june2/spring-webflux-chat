@@ -63,6 +63,7 @@ $(document).ready(function () {
 			websocket.close();
 		}
 		setConnected(false);
+		window.localStorage.clear();
 		console.log("Session Closed. WebSocket Disconnected.");
 	}
 

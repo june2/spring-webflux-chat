@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .authorizeExchange()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                .pathMatchers("/**/**").permitAll()
+                .pathMatchers("/**/**").permitAll() // 전부 허용 TODO: 변경 필요!
                 .anyExchange()
                 .authenticated()
                 .and()

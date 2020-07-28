@@ -27,6 +27,9 @@ public class JwtService {
         this.encodedSecret = generateEncodedSecret(this.plainSecret);
     }
 
+    /**
+     * Jwt 생성
+     */
     protected String generateEncodedSecret(String plainSecret) {
         if (StringUtils.isEmpty(plainSecret)) {
             throw new IllegalArgumentException("JWT secret cannot be null or empty.");
@@ -36,12 +39,18 @@ public class JwtService {
                 .encodeToString(this.plainSecret.getBytes());
     }
 
+    /**
+     * Jwt 기간 체크
+     */
     protected Date getExpirationTime() {
         Date now = new Date();
         Long expireInMilis = TimeUnit.HOURS.toMillis(expireHours);
         return new Date(expireInMilis + now.getTime());
     }
 
+    /**
+     * Jwt Token을 복호화 하여 유저정보를 얻는다
+     */
     protected User getUser(String encodedSecret, String token) {
         try {
             Claims claims = Jwts.parser()
@@ -57,7 +66,9 @@ public class JwtService {
         }
     }
 
-
+    /**
+     * Jwt Token을 복호화 하여 이름을 얻는다.
+     */
     protected String getToken(String encodedSecret, User user) {
         return Jwts.builder()
                 .setId(user.getId().toString())
