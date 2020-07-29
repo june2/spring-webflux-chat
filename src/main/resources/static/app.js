@@ -43,7 +43,7 @@ $(document).ready(function () {
                 case 'USER_JOINED' :
                     showAlertJoin(chatMessage);
                 case 'USER_LEFT' :
-                    showAlertLeft(chatMessage);
+//                    showAlertLeft(chatMessage);
             }
 		};
 
