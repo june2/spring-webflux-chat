@@ -60,12 +60,12 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                 })
                 .doOnSubscribe(subscription -> {
                     log.info("User '{}' Connected.", user.toString(), webSocketSession);
-                    chatMessageFluxSink.next(new ChatMessage(Type.USER_JOINED, user.getEmail(), user.getId()));
+                    sendMessage(new ChatMessage(Type.USER_JOINED, user.getEmail(), user.getId()));
                 })
                 .doOnError(throwable -> log.info("Error Occurred while sending message to Redis.", throwable))
                 .doFinally(signalType -> {
                     log.info("User '{}' Disconnected.", webSocketSession);
-                    chatMessageFluxSink.next(new ChatMessage(Type.USER_LEFT, user.getEmail(), user.getId()));
+                    sendMessage(new ChatMessage(Type.USER_LEFT, user.getEmail(), user.getId()));
                 })
                 .then();
 
@@ -84,7 +84,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
     }
 
     /**
-     * send message
+     * 메시지 전송
      */
     private void sendMessage(ChatMessage chatMessage) {
         chatMessageFluxSink.next(chatMessage);
