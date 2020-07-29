@@ -61,7 +61,7 @@ $ ./gradlew bootRun
 
 ### 멀티채널 구현
 - 브랜치(mulit)에 백엔드 소스만 구현
-- 인증
+- rest api auth인증은 미구현
 - 멀티 채널(채팅방 생성) 구현 설계
   - 인증 받은 사용자가 api를 통하여 room을 생성하고 room이름으로 redis채널을 생성한다.
      - room name은 유니크 값이다.
