@@ -57,6 +57,8 @@ $ ./gradlew bootRun
   - `ws://localhost:8080/redis-chat?token=test`
   - JWT 인증토큰을 param으로 전달 받아 인증체크
 
+- client test tool
+  - [websocket-test-client](https://chrome.google.com/webstore/detail/websocket-test-client/fgponpodhbmadfljofbimhhlengambbn)
 ---
 
 ### 추가 기능: 멀티채널 구현
